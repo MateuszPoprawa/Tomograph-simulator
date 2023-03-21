@@ -1,29 +1,37 @@
 import math
 
 def Bresenham_Algorithm_DA_X(x1, y1, x2, y2, image, view):
-    m = 1024
-    dx = m * (x2 - x1)
-    dy = m * (y2 - y1)
+    dx = x2 - x1
+    dy = y2 - y1
+    m = abs(dy / dx)
+    if dx > 0:
+        x_inc = 1
+    else:
+        x_inc = -1
+    if dy > 0:
+        y_inc = 1
+    else:
+        y_inc = -1
     i1 = math.floor(x1)
     i2 = math.floor(x2)
     j = math.floor(y1)
-    e = math.floor( dy * ( 1 - (x1 - i1) ) - dx * (1 - y1 - j) )
+    e =  -(1 - (y1 - j) - (dy*(1 - (x1 - i1))) / dx)
     l = []
-    for i in range(i1, i2):
+    for i in range(i1, i2, x_inc):
         if i >= 0 and j >= 0 and i < image.width and j < image.height:
             l.append((i, j))
         if i % 1000 == 0:
             illuminate(l, image, view)
             l = []
-        if (e > 0):
-            j += 1
-            e -= dx
-        e += dy
+        if (e >= 0):
+            j += y_inc
+            e -= 1.0
+        e += m
     illuminate(l, image, view)
 
 def Bresenham_Algorithm_DA_Y(x1, y1, x2, y2, image, view):
-    dx = (x2 - x1)
-    dy = (y2 - y1)
+    dx = x2 - x1
+    dy = y2 - y1
     m = abs(dx / dy)
     i = math.floor(x1)
     j1 = math.floor(y1)
@@ -35,7 +43,11 @@ def Bresenham_Algorithm_DA_Y(x1, y1, x2, y2, image, view):
     else:
         inc = -1
         e = -((x1 - i) - (y1 -j1) * (dx / dy))
-    for j in range(j1, j2):
+    if dy > 0:
+        y_inc = 1
+    else:
+        y_inc = -1
+    for j in range(j1, j2, y_inc):
         while e >= 0:
             i += inc
             e -= 1.0
