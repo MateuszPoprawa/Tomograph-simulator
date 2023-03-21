@@ -6,8 +6,11 @@ import functions
 import settings
 
 col1, col2, col3 = st.columns(3)
-title = st.title("Tomograph simulator")
+title = st.title("Symulator tomografu")
 
+settings.alpha_step = st.sidebar.slider("Krok ∆α", 0, 360, 60)
+settings.n = st.sidebar.slider("Liczba detektorów", 2, 90, 30)
+settings.phi = st.sidebar.slider("Rozwartość/rozpiętość układu emiter/detektor", 0, 180, 60)
 
 uploaded_file = st.sidebar.file_uploader("Choose a file", type=['png', 'jpg'])
 sidebar_col1, sidebar_col2, sidebar_col3 = st.sidebar.columns(3)
