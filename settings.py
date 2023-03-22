@@ -1,3 +1,3 @@
-alpha_step = 30
-phi = 60
-n = 30
+alpha_step = 60
+phi = 30
+n = 60
