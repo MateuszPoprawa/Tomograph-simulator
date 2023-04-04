@@ -18,18 +18,9 @@ sidebar_col1, sidebar_col2, sidebar_col3 = st.sidebar.columns(3)
 if sidebar_col2.button('Start', type = "primary"):  
     if uploaded_file is not None:
         uploaded_image = Image.open(uploaded_file).convert("RGB")
-        img = st.image(uploaded_image)
-        width = uploaded_image.width
-        height = uploaded_image.height
-        r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
+        img_view = st.image(uploaded_image)
         copy = uploaded_image.copy()
-        for alpha in range(0, 360, settings.alpha_step):                     
-            xe = r * math.cos(math.radians(alpha)) + (width / 2)
-            ye = (height / 2) - r * math.sin(math.radians(alpha))
-            for i in range(0, settings.n):
-                xd = r * math.cos(math.radians(alpha) + math.pi - math.radians(settings.phi / 2) + math.radians(i * settings.phi / (settings.n - 1))) + (width / 2)
-                yd = (height / 2) - r * math.sin(math.radians(alpha) + math.pi - math.radians(settings.phi / 2) + math.radians(i * settings.phi / (settings.n - 1)))
-                if abs(xd - xe) > abs(yd - ye):
-                    functions.Bresenham_Algorithm_DA_X(xe, ye, xd, yd, copy, img)
-                else:
-                    functions.Bresenham_Algorithm_DA_Y(xe, ye, xd, yd, copy, img)
+        sinogram = functions.create_sinogram(copy, img_view)
+        img = Image.new("RGB", (uploaded_image.width, uploaded_image.height))
+        new_view = st.image(img)
+        functions.create_image(img, sinogram, new_view)

@@ -1,4 +1,5 @@
 import math
+import settings
 
 def Bresenham_Algorithm_DA_X(x1, y1, x2, y2, image, view):
     dx = x2 - x1
@@ -20,14 +21,12 @@ def Bresenham_Algorithm_DA_X(x1, y1, x2, y2, image, view):
     for i in range(i1, i2, x_inc):
         if i >= 0 and j >= 0 and i < image.width and j < image.height:
             l.append((i, j))
-        if i % 1000 == 0:
-            illuminate(l, image, view)
-            l = []
         if (e >= 0):
             j += y_inc
             e -= 1.0
         e += m
-    illuminate(l, image, view)
+    #illuminate(l, image, view)
+    return l
 
 def Bresenham_Algorithm_DA_Y(x1, y1, x2, y2, image, view):
     dx = x2 - x1
@@ -53,14 +52,55 @@ def Bresenham_Algorithm_DA_Y(x1, y1, x2, y2, image, view):
             e -= 1.0
         if i >= 0 and j >= 0 and i < image.width and j < image.height:
             l.append((i, j))
-        if i % 1000 == 0:
-            illuminate(l, image, view)
-            l = []
         j += inc
         e += m
-    illuminate(l, image, view)
+    #illuminate(l, image, view)
+    return l
 
 def illuminate(l, image, view):
     for (x, y) in l:
         image.putpixel( (x, y), 255 )    
     view.image(image)
+
+def create_sinogram(image, img_view):
+    width = image.width
+    height = image.height
+    r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
+    sinogram = []
+    for alpha in range(0, 360, settings.alpha_step):                     
+        xe = r * math.cos(math.radians(alpha)) + (width / 2)
+        ye = (height / 2) - r * math.sin(math.radians(alpha))
+        for i in range(0, settings.n):
+            xd = r * math.cos(math.radians(alpha) + math.pi - math.radians(settings.phi / 2) + math.radians(i * settings.phi / (settings.n - 1))) + (width / 2)
+            yd = (height / 2) - r * math.sin(math.radians(alpha) + math.pi - math.radians(settings.phi / 2) + math.radians(i * settings.phi / (settings.n - 1)))
+            print(ye, yd)
+            if abs(xd - xe) > abs(yd - ye):
+                points = Bresenham_Algorithm_DA_X(xe, ye, xd, yd, image, img_view)
+            else:
+                points = Bresenham_Algorithm_DA_Y(xe, ye, xd, yd, image, img_view)
+            sum = (0, 0, 0)
+            count = 0
+            for (x, y) in points:
+                color = image.getpixel((x,y))
+                sum = tuple(map(lambda i, j: i + j, sum, color))
+                count += 1
+            sinogram.append([alpha, tuple(map(lambda i: i / count, sum))])
+    return sinogram
+
+def create_image(image, sinogram, img_view):
+    width = image.width
+    height = image.height
+    r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
+    for alpha, (r, g, b) in sinogram:                   
+        xe = r * math.cos(math.radians(alpha)) + (width / 2)
+        ye = (height / 2) - r * math.sin(math.radians(alpha))
+        for i in range(0, settings.n):
+            xd = r * math.cos(math.radians(alpha) + math.pi - math.radians(settings.phi / 2) + math.radians(i * settings.phi / (settings.n - 1))) + (width / 2)
+            yd = (height / 2) - r * math.sin(math.radians(alpha) + math.pi - math.radians(settings.phi / 2) + math.radians(i * settings.phi / (settings.n - 1)))
+            if abs(xd - xe) > abs(yd - ye):
+                points = Bresenham_Algorithm_DA_X(xe, ye, xd, yd, image, img_view)
+            else:
+                points = Bresenham_Algorithm_DA_Y(xe, ye, xd, yd, image, img_view)
+            for (x, y) in points:
+                image.putpixel( (x, y), (int(r), int(g) ,int(b)) )
+    img_view.image(image)
