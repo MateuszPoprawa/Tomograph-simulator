@@ -9,7 +9,7 @@ col1, col2, col3 = st.columns(3)
 title = st.title("Symulator tomografu")
 
 settings.alpha_step = st.sidebar.slider("Krok ∆α", 1, 60, 30)
-settings.n = st.sidebar.slider("Liczba detektorów", 2, 90, 30)
+settings.n = st.sidebar.slider("Liczba detektorów", 2, 360, 30)
 settings.phi = st.sidebar.slider("Rozwartość/rozpiętość układu emiter/detektor", 1, 180, 60)
 
 uploaded_file = st.sidebar.file_uploader("Choose a file", type=['png', 'jpg'])
@@ -23,4 +23,4 @@ if sidebar_col2.button('Start', type = "primary"):
         sinogram = functions.create_sinogram(copy, img_view)
         img = Image.new("RGB", (uploaded_image.width, uploaded_image.height))
         new_view = st.image(img)
-        functions.create_image(img, sinogram, new_view)
+        functions.backprojection(img, sinogram, new_view)

@@ -1,7 +1,7 @@
 import math
 import settings
 import numpy as np
-from  PIL import Image
+from  PIL import Image, ImageOps
 
 def Bresenham_Algorithm_DA_X(x1, y1, x2, y2, image, view, illum = False):
     dx = x2 - x1
@@ -68,7 +68,7 @@ def illuminate(l, image, view):
 
 def create_sinogram(image, img_view):
     width, height = image.width, image.height
-    im_matrix = np.array(image)
+    im_matrix = np.array(ImageOps.grayscale(image))
     r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
     sinogram = []
     j = 0
@@ -78,19 +78,18 @@ def create_sinogram(image, img_view):
         for i in range(0, settings.n):
             xd, yd = detector_cord(r, alpha, height, width, i)
             points = calcualte_points(xe, ye, xd, yd, image, img_view)
-            sum = (0, 0, 0)
+            val = 0
             count = 0
             for (x, y) in points:
-                color = im_matrix[y][x]
-                sum = tuple(map(lambda i, j: i + j, sum, color))                
+                val += im_matrix[y][x]               
                 count += 1
-            sinogram[j].append(tuple(map(lambda i: i / count, sum)))
+            sinogram[j].append(val / count)
         j += 1   
     return sinogram
 
-def create_image(image, sinogram, img_view):
+def backprojection(image, sinogram, img_view):
     width, height = image.width, image.height
-    im_matrix = np.array(image)
+    im_matrix = np.array(ImageOps.grayscale(image))
     radius = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
     for j in range(0, len(sinogram)):
         alpha = sinogram[j][0]               
@@ -98,10 +97,8 @@ def create_image(image, sinogram, img_view):
         for i in range(0, settings.n):
             xd, yd = detector_cord(radius, alpha, height, width, i)
             points = calcualte_points(xe, ye, xd, yd, image, img_view)
-            r, g, b = sinogram[j][i + 1]
             for (x, y) in points:
-                old_r, old_g, old_b = im_matrix[y][x]
-                im_matrix[y][x] = (old_r + r), (old_g + g), (old_b + b)
+                im_matrix[y][x] += sinogram[j][i + 1]
     img_view.image(Image.fromarray(im_matrix))
 
 def emiter_cord(r, alpha, height, width):
