@@ -81,10 +81,10 @@ def create_sinogram(image, img_view):
             val = 0
             count = 0
             for (x, y) in points:
-                val += im_matrix[y][x]               
+                val += im_matrix[y][x] 
                 count += 1
             sinogram[j].append(val / count)
-        j += 1   
+        j += 1
     return sinogram
 
 def backprojection(image, sinogram, img_view):
@@ -94,11 +94,11 @@ def backprojection(image, sinogram, img_view):
     for j in range(0, len(sinogram)):
         alpha = sinogram[j][0]               
         xe, ye = emiter_cord(radius, alpha, height, width)
-        for i in range(0, settings.n):
+        for i in range(1, settings.n + 1):
             xd, yd = detector_cord(radius, alpha, height, width, i)
             points = calcualte_points(xe, ye, xd, yd, image, img_view)
             for (x, y) in points:
-                im_matrix[y][x] += sinogram[j][i + 1]
+                im_matrix[y][x] += sinogram[j][i]
     img_view.image(Image.fromarray(im_matrix))
 
 def emiter_cord(r, alpha, height, width):
