@@ -83,23 +83,27 @@ def create_sinogram(image, img_view):
             for (x, y) in points:
                 val += im_matrix[y][x] 
                 count += 1
-            sinogram[j].append(val / count)
-        j += 1
+            if count > 0:
+                sinogram[j].append(val / count)
+            else:
+                sinogram[j].append(0)
+        j += 1   
     return sinogram
 
 def backprojection(image, sinogram, img_view):
     width, height = image.width, image.height
-    im_matrix = np.array(ImageOps.grayscale(image))
-    radius = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
+    im_matrix = np.zeros((height, width))
+    r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
     for j in range(0, len(sinogram)):
         alpha = sinogram[j][0]               
-        xe, ye = emiter_cord(radius, alpha, height, width)
+        xe, ye = emiter_cord(r, alpha, height, width)
         for i in range(1, settings.n + 1):
-            xd, yd = detector_cord(radius, alpha, height, width, i)
+            xd, yd = detector_cord(r, alpha, height, width, i)
             points = calcualte_points(xe, ye, xd, yd, image, img_view)
             for (x, y) in points:
                 im_matrix[y][x] += sinogram[j][i]
-    img_view.image(Image.fromarray(im_matrix))
+    normalized_matrix = 255*(im_matrix - np.min(im_matrix))/(np.max(im_matrix) - np.min(im_matrix))
+    img_view.image(Image.fromarray(normalized_matrix).convert("RGB"))
 
 def emiter_cord(r, alpha, height, width):
     xe = r * math.cos(math.radians(alpha)) + (width / 2)
