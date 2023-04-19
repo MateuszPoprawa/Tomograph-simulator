@@ -66,18 +66,18 @@ def illuminate(l, image, view):
         image.putpixel( (x, y), 255 )    
     view.image(image)
 
-def create_sinogram(image, img_view):
+def create_sinogram(image, image_view, sinogram_view, progress):
     width, height = image.width, image.height
     im_matrix = np.array(ImageOps.grayscale(image))
     r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
     sinogram = []
     j = 0
-    for alpha in range(0, 360, settings.alpha_step):
-        sinogram.append([alpha])                   
+    for alpha in range(0, 360, settings.alpha_step):  
+        sinogram.append([])               
         xe, ye = emiter_cord(r, alpha, height, width)
         for i in range(0, settings.n):
             xd, yd = detector_cord(r, alpha, height, width, i)
-            points = calcualte_points(xe, ye, xd, yd, image, img_view)
+            points = calcualte_points(xe, ye, xd, yd, image, image_view)
             val = 0
             count = 0
             for (x, y) in points:
@@ -87,23 +87,35 @@ def create_sinogram(image, img_view):
                 sinogram[j].append(val / count)
             else:
                 sinogram[j].append(0)
+        if settings.show_iterations:
+            sinogram_view.image(Image.fromarray(np.array(sinogram)).convert("RGB").resize((width, height)))
         j += 1   
+        progress.progress(j / (360 / settings.alpha_step * 2))
+    sinogram_view.image(Image.fromarray(np.array(sinogram)).convert("RGB").resize((width, height)))
     return sinogram
 
-def backprojection(image, sinogram, img_view):
+def backprojection(image, sinogram, view, progress):
     width, height = image.width, image.height
     im_matrix = np.zeros((height, width))
     r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
     for j in range(0, len(sinogram)):
-        alpha = sinogram[j][0]               
+        alpha = j * settings.alpha_step               
         xe, ye = emiter_cord(r, alpha, height, width)
-        for i in range(1, settings.n + 1):
+        for i in range(0, settings.n):
             xd, yd = detector_cord(r, alpha, height, width, i)
-            points = calcualte_points(xe, ye, xd, yd, image, img_view)
+            points = calcualte_points(xe, ye, xd, yd, image, view)
             for (x, y) in points:
-                im_matrix[y][x] += sinogram[j][i]
-    normalized_matrix = 255*(im_matrix - np.min(im_matrix))/(np.max(im_matrix) - np.min(im_matrix))
-    img_view.image(Image.fromarray(normalized_matrix).convert("RGB"))
+                im_matrix[y][x] += sinogram[j][i] 
+        if settings.show_iterations:
+            update_view(im_matrix, view)
+        progress.progress((j + 1)/ (len(sinogram) * 2) + 0.5)
+    return update_view(im_matrix, view)
+
+def update_view(matrix, view):
+    normalized_matrix = 255*(matrix - np.min(matrix))/(np.max(matrix) - np.min(matrix))
+    img = Image.fromarray(normalized_matrix).convert("RGB")
+    view.image(img)
+    return img
 
 def emiter_cord(r, alpha, height, width):
     xe = r * math.cos(math.radians(alpha)) + (width / 2)
