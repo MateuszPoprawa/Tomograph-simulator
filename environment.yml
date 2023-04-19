@@ -1,6 +1,0 @@
-name: env1
-channels:
-  - conda-forge
-  - defaults
-dependencies:
-  - pydicom=2.3.1=pyh1a96a4e_0
