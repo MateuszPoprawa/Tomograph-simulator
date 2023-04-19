@@ -1,7 +1,5 @@
 import streamlit as st
-import pandas as pd
 from  PIL import Image, ImageOps
-import math
 import functions
 import settings
 import save_dicom
@@ -19,12 +17,14 @@ def run():
     progress.empty()
     if settings.save_as_dicom:
         save_dicom.save_as_dicom(patient_data['PatientID'], array(ImageOps.grayscale(backprojection_img)), patient_data)
-    
+    functions.MSE(uploaded_image, backprojection_img)
+
 def config():
     settings.alpha_step = st.sidebar.slider("Krok ∆α", 1, 10, 5)
     settings.n = st.sidebar.slider("Liczba detektorów", 10, 360, 180)
     settings.phi = st.sidebar.slider("Rozwartość/rozpiętość układu emiter/detektor", 10, 180, 90)
     settings.show_iterations = st.sidebar.checkbox("Pokaż kroki pośrednie")
+    settings.filtering = st.sidebar.checkbox("Użyj filtrowania")
     save_as_dicom = st.sidebar.checkbox("Zapisz jako DICOM")
     settings.save_as_dicom = False
     if save_as_dicom:

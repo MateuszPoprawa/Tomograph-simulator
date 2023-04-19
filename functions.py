@@ -92,6 +92,8 @@ def create_sinogram(image, image_view, sinogram_view, progress):
         j += 1   
         progress.progress(j / (360 / settings.alpha_step * 2))
     sinogram_view.image(Image.fromarray(np.array(sinogram)).convert("RGB").resize((width, height)))
+    if settings.filtering:
+        sinogram = filter(sinogram)
     return sinogram
 
 def backprojection(image, sinogram, view, progress):
@@ -133,3 +135,33 @@ def calcualte_points(xe, ye, xd, yd, image, img_view, illuminate = False):
     else:
         points = Bresenham_Algorithm_DA_Y(xe, ye, xd, yd, image, img_view, illuminate)
     return points
+
+def create_kernel():
+    kernel = []
+    start = -(settings.kernel_size - 1) / 2
+    end = (settings.kernel_size - 1) / 2 + 1
+    for k in range(int(start), int(end)):
+        if k == 0:
+            kernel.append(1)
+        elif k % 2 == 0:
+            kernel.append(0)
+        else:
+            kernel.append((-4 / (np.pi * np.pi)) / (k * k))
+    return kernel
+
+def filter(sinogram):
+    kernel = create_kernel()
+    for i in range(len(sinogram)):
+        sinogram[i] = np.convolve(sinogram[i], kernel, mode="same")
+    return sinogram
+
+def MSE(image, backprojection_image):
+    width, height = image.width, image.height
+    mse = 0
+    img1 = np.array(ImageOps.grayscale(image))
+    img2 = np.array(ImageOps.grayscale(backprojection_image))
+    for x in range(width):
+        for y in range(height):
+            mse += (int(img1[y][x]) - int(img2[y][x]))**2
+    mse /= width * height
+    print(mse)
