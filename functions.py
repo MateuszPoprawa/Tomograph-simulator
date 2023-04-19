@@ -155,13 +155,14 @@ def filter(sinogram):
         sinogram[i] = np.convolve(sinogram[i], kernel, mode="same")
     return sinogram
 
-def MSE(image, backprojection_image):
+def RMSE(image, backprojection_image):
     width, height = image.width, image.height
-    mse = 0
+    rmse = 0
     img1 = np.array(ImageOps.grayscale(image))
     img2 = np.array(ImageOps.grayscale(backprojection_image))
     for x in range(width):
         for y in range(height):
-            mse += (int(img1[y][x]) - int(img2[y][x]))**2
-    mse /= width * height
-    print(mse)
+            rmse += (int(img1[y][x]) - int(img2[y][x]))**2
+    rmse /= width * height
+    rmse = math.sqrt(rmse)
+    print(rmse)
