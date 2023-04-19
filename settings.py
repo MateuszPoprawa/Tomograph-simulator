@@ -1,4 +1,4 @@
-alpha_step = 60
+alpha_step = 5.0
 phi = 30
 n = 60
 show_iterations = False

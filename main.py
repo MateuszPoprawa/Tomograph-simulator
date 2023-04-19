@@ -17,12 +17,12 @@ def run():
     progress.empty()
     if settings.save_as_dicom:
         save_dicom.save_as_dicom(patient_data['PatientID'], array(ImageOps.grayscale(backprojection_img)), patient_data)
-    functions.MSE(uploaded_image, backprojection_img)
+    functions.RMSE(uploaded_image, backprojection_img)
 
 def config():
-    settings.alpha_step = st.sidebar.slider("Krok ∆α", 1, 10, 5)
-    settings.n = st.sidebar.slider("Liczba detektorów", 10, 360, 180)
-    settings.phi = st.sidebar.slider("Rozwartość/rozpiętość układu emiter/detektor", 10, 180, 90)
+    settings.alpha_step = st.sidebar.slider("Krok ∆α", 0.5, 10.0, 5.0, 0.1)
+    settings.n = st.sidebar.slider("Liczba detektorów", 10, 720, 360)
+    settings.phi = st.sidebar.slider("Rozwartość/rozpiętość układu emiter/detektor", 45, 270, 180)
     settings.show_iterations = st.sidebar.checkbox("Pokaż kroki pośrednie")
     settings.filtering = st.sidebar.checkbox("Użyj filtrowania")
     save_as_dicom = st.sidebar.checkbox("Zapisz jako DICOM")

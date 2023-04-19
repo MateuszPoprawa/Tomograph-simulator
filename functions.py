@@ -72,7 +72,7 @@ def create_sinogram(image, image_view, sinogram_view, progress):
     r = math.sqrt((width / 2) * (width / 2) + (height / 2) * (height / 2))
     sinogram = []
     j = 0
-    for alpha in range(0, 360, settings.alpha_step):  
+    for alpha in np.arange(0, 360, settings.alpha_step):  
         sinogram.append([])               
         xe, ye = emiter_cord(r, alpha, height, width)
         for i in range(0, settings.n):
